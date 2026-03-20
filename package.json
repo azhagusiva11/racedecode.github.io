@@ -1,0 +1,19 @@
+{
+  "name": "racedecode-github-io",
+  "version": "1.0.0",
+  "description": "Race Decode - F1 through an engineer's lens",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/azhagusiva11/racedecode.github.io.git"
+  },
+  "keywords": ["f1", "formula1", "analytics", "racing"],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/azhagusiva11/racedecode.github.io/issues"
+  },
+  "homepage": "https://github.com/azhagusiva11/racedecode.github.io#readme",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
