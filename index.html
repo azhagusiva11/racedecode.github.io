@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Race Decode — F1 through an engineer's lens</title>
 <meta name="description" content="Data-driven Formula 1 post-race analysis. Real telemetry. Honest numbers. Published after every Grand Prix.">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Race Decode — F1 through an engineer's lens">
+<meta property="og:description" content="Data-driven Formula 1 post-race analysis. Real telemetry. Honest numbers.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://racedecode.com">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Race Decode">
+<meta name="twitter:description" content="Data-driven F1 post-race analysis. Real telemetry. Honest numbers.">
+
+<!-- Favicon -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='12' width='100' height='100' fill='%230a0a12'/><text x='50' y='68' text-anchor='middle' font-size='55' font-weight='900' font-family='system-ui' fill='%2300e5c6'>R</text></svg>">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -12,38 +25,60 @@
 :root{--bg:#0a0a12;--card:#12121e;--ac:#00e5c6;--txt:#e8e8f0;--t2:#8888aa;--t3:#555570;--bdr:#1e1e35}
 body{background:var(--bg);color:var(--txt);font-family:'Outfit',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center}
 
-.header{width:100%;padding:3rem 2rem;text-align:center;position:relative}
+/* Animated background grid */
+body::before{content:'';position:fixed;inset:0;background:
+  linear-gradient(90deg,#00e5c605 1px,transparent 1px) 0 0 / 60px 60px,
+  linear-gradient(#00e5c605 1px,transparent 1px) 0 0 / 60px 60px;
+  pointer-events:none;z-index:0}
+
+.header{width:100%;padding:4rem 2rem 3rem;text-align:center;position:relative}
 .header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 0%,#00e5c620 0%,transparent 70%)}
 .header *{position:relative;z-index:1}
-.logo{font-size:2.5rem;font-weight:900;letter-spacing:-.03em}
+.logo{font-size:2.8rem;font-weight:900;letter-spacing:-.03em;opacity:0;animation:fadeUp .6s ease forwards .1s}
 .logo .a{color:var(--ac)}
-.tag{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--t2);letter-spacing:.15em;margin-top:.5rem}
+.tag{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--t2);letter-spacing:.15em;margin-top:.6rem;opacity:0;animation:fadeUp .6s ease forwards .25s}
+.season-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ac);border:1px solid var(--ac);border-radius:4px;padding:.15rem .5rem;margin-top:.8rem;letter-spacing:.1em;opacity:0;animation:fadeUp .6s ease forwards .4s}
 
-.main{max-width:700px;width:100%;padding:2rem;flex:1}
+@keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
 
-.intro{text-align:center;margin-bottom:3rem}
+.main{max-width:700px;width:100%;padding:2rem;flex:1;position:relative;z-index:1}
+
+.section-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--t3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.8rem;padding-left:.2rem}
+
+.intro{text-align:center;margin-bottom:2.5rem}
 .intro p{font-size:1.05rem;color:var(--t2);line-height:1.8}
 
-.race-card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-decoration:none;display:block;transition:border-color .3s,transform .3s}
-.race-card:hover{border-color:var(--ac);transform:translateY(-2px)}
+.race-card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-decoration:none;display:block;transition:border-color .3s,transform .3s,box-shadow .3s;position:relative;overflow:hidden}
+.race-card::after{content:'→';position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);font-size:1.2rem;color:var(--t3);transition:color .3s,transform .3s}
+.race-card:hover{border-color:var(--ac);transform:translateY(-2px);box-shadow:0 8px 30px #00e5c610}
+.race-card:hover::after{color:var(--ac);transform:translateY(-50%) translateX(3px)}
 .race-card .round{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ac);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.4rem}
 .race-card h2{font-size:1.4rem;font-weight:800;color:var(--txt);margin-bottom:.3rem}
+.race-card .flag{font-style:normal;margin-right:.3rem}
 .race-card .detail{font-size:.85rem;color:var(--t2)}
 .race-card .stats{display:flex;gap:1.5rem;margin-top:.8rem;flex-wrap:wrap}
 .race-card .stat{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--t3)}
 .race-card .stat span{color:var(--txt);font-weight:600}
 
-.coming{text-align:center;padding:2rem;border:1px dashed var(--bdr);border-radius:12px;margin-bottom:1rem}
+.divider{width:40px;height:1px;background:var(--bdr);margin:1.5rem auto}
+
+.coming{text-align:center;padding:2rem;border:1px dashed var(--bdr);border-radius:12px;margin-bottom:1rem;transition:border-color .3s}
+.coming:hover{border-color:var(--t3)}
 .coming .round{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--t3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.4rem}
 .coming h2{font-size:1.2rem;font-weight:700;color:var(--t3)}
 .coming .detail{font-size:.8rem;color:var(--t3);margin-top:.3rem}
+.coming .countdown{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--ac);margin-top:.6rem;opacity:.7}
 
-.subscribe{text-align:center;margin:3rem 0 2rem}
+.subscribe{text-align:center;margin:3rem 0 2rem;padding:2rem;background:var(--card);border:1px solid var(--bdr);border-radius:12px}
 .subscribe p{font-size:.95rem;color:var(--t2);margin-bottom:1rem}
-.subscribe a{display:inline-block;background:var(--ac);color:var(--bg);font-weight:700;font-size:.9rem;padding:.7rem 2rem;border-radius:8px;text-decoration:none;transition:opacity .3s}
-.subscribe a:hover{opacity:.85}
+.subscribe a{display:inline-block;background:var(--ac);color:var(--bg);font-weight:700;font-size:.9rem;padding:.7rem 2rem;border-radius:8px;text-decoration:none;transition:transform .3s,box-shadow .3s}
+.subscribe a:hover{transform:translateY(-1px);box-shadow:0 4px 20px #00e5c630}
 
-.footer{width:100%;text-align:center;padding:2rem;color:var(--t3);font-size:.65rem;border-top:1px solid var(--bdr)}
+.footer{width:100%;text-align:center;padding:2.5rem 2rem;color:var(--t3);font-size:.65rem;border-top:1px solid var(--bdr);position:relative;z-index:1}
+.footer-logo{color:var(--ac);font-weight:700;font-size:.75rem;letter-spacing:.05em}
+.footer-sub{margin-top:.4rem;font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--t3)}
+
+@media(max-width:600px){.header{padding:3rem 1.5rem 2rem}.logo{font-size:2.2rem}.main{padding:1.5rem}}
 </style>
 </head>
 <body>
@@ -51,6 +86,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Outfit',sans-serif;min-h
 <div class="header">
 <div class="logo">Race <span class="a">Decode</span></div>
 <div class="tag">F1 through an engineer's lens</div>
+<div class="season-badge">2026 Season</div>
 </div>
 
 <div class="main">
@@ -59,9 +95,11 @@ body{background:var(--bg);color:var(--txt);font-family:'Outfit',sans-serif;min-h
 <p>Real telemetry. Honest numbers. No opinions disguised as analysis.<br>Published after every Grand Prix.</p>
 </div>
 
+<div class="section-label">Latest Decodes</div>
+
 <a href="china.html" class="race-card">
 <div class="round">Round 02 · Sprint Weekend</div>
-<h2>Chinese GP — Antonelli's First Win</h2>
+<h2><em class="flag">🇨🇳</em> Chinese GP — Antonelli's First Win</h2>
 <div class="detail">Shanghai · 56 Laps · 15 March 2026</div>
 <div class="stats">
 <div class="stat">Team gap <span>0.71s</span></div>
@@ -72,7 +110,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Outfit',sans-serif;min-h
 
 <a href="australia.html" class="race-card">
 <div class="round">Round 01</div>
-<h2>Australian GP — Mercedes One-Two</h2>
+<h2><em class="flag">🇦🇺</em> Australian GP — Mercedes One-Two</h2>
 <div class="detail">Melbourne · 57 Laps · 2 March 2026</div>
 <div class="stats">
 <div class="stat">Team gap <span>≈ 0.00s</span></div>
@@ -81,21 +119,27 @@ body{background:var(--bg);color:var(--txt);font-family:'Outfit',sans-serif;min-h
 </div>
 </a>
 
+<div class="divider"></div>
+
+<div class="section-label">Up Next</div>
+
 <div class="coming">
-<div class="round">Round 03 · Next</div>
-<h2>Japanese GP — Suzuka</h2>
-<div class="detail">27 March 2026 · Decode drops Monday 28 March</div>
+<div class="round">Round 03</div>
+<h2>🇯🇵 Japanese GP — Suzuka</h2>
+<div class="detail">27 March 2026</div>
+<div class="countdown">Decode drops Monday 28 March</div>
 </div>
 
 <div class="subscribe">
-<p>Get each decode in your inbox. Free.</p>
+<p>Get each decode in your inbox. Free, forever.</p>
 <a href="#">Subscribe on Substack →</a>
 </div>
 
 </div>
 
 <div class="footer">
-<span style="color:var(--ac);font-weight:700">RACE DECODE</span> · FastF1 telemetry · racedecode.com
+<div class="footer-logo">RACE DECODE</div>
+<div class="footer-sub">Powered by FastF1 telemetry · racedecode.com · 2026</div>
 </div>
 
 </body>
