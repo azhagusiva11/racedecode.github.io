@@ -16,190 +16,388 @@
 <meta name="twitter:description" content="Data-driven F1 post-race analysis. Real telemetry. Honest numbers.">
 
 <!-- Favicon -->
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='12' width='100' height='100' fill='%230a0a12'/><text x='50' y='68' text-anchor='middle' font-size='55' font-weight='900' font-family='system-ui' fill='%2300e5c6'>R</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='12' width='100' height='100' fill='%230a0a0f'/><text x='50' y='68' text-anchor='middle' font-size='55' font-weight='900' font-family='system-ui' fill='%2300e5c6'>R</text></svg>">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-:root{--bg:#0a0a12;--card:#12121e;--ac:#00e5c6;--txt:#e8e8f0;--t2:#8888aa;--t3:#555570;--bdr:#1e1e35}
-body{background:var(--bg);color:var(--txt);font-family:'Outfit',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+:root{
+  --bg:#06060c;--bg2:#0c0c16;--card:#111120;--card2:#16162a;
+  --ac:#00e5c6;--ac2:#00ffdd;--gold:#f0b429;--red:#ff3b5c;
+  --txt:#eaeaf2;--t2:#8080a0;--t3:#4a4a68;--bdr:#1a1a30;--bdr2:#252545;
+}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,sans-serif;line-height:1.6;overflow-x:hidden}
 
-/* Animated background grid */
-body::before{content:'';position:fixed;inset:0;background:
-  linear-gradient(90deg,#00e5c605 1px,transparent 1px) 0 0 / 60px 60px,
-  linear-gradient(#00e5c605 1px,transparent 1px) 0 0 / 60px 60px;
-  pointer-events:none;z-index:0}
+/* === ANIMATED BG === */
+.bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg-grid::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 0%,var(--bg) 100%),
+  linear-gradient(90deg,#00e5c604 1px,transparent 1px) 0 0 / 80px 80px,
+  linear-gradient(0deg,#00e5c604 1px,transparent 1px) 0 0 / 80px 80px}
+.bg-grid::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(ellipse 40% 30% at 60% 20%,#00e5c608 0%,transparent 70%),
+  radial-gradient(ellipse 30% 40% at 20% 80%,#f0b42905 0%,transparent 70%)}
 
-/* Sticky nav */
-.nav{position:sticky;top:0;width:100%;padding:.8rem 2rem;display:flex;justify-content:space-between;align-items:center;background:rgba(10,10,18,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--bdr);z-index:100;opacity:0;animation:fadeUp .6s ease forwards}
-.nav-logo{font-size:1rem;font-weight:800;letter-spacing:-.02em}
-.nav-logo .a{color:var(--ac)}
-.nav-links{display:flex;gap:1.5rem;align-items:center}
-.nav-links a{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--t2);text-decoration:none;letter-spacing:.08em;transition:color .3s}
-.nav-links a:hover{color:var(--ac)}
-.nav-links .nav-cta{color:var(--bg);background:var(--ac);padding:.35rem .8rem;border-radius:6px;font-weight:600;transition:transform .3s,box-shadow .3s}
-.nav-links .nav-cta:hover{transform:translateY(-1px);box-shadow:0 4px 15px #00e5c630;color:var(--bg)}
+/* === NAV === */
+.nav{position:fixed;top:0;width:100%;padding:0 2rem;height:56px;display:flex;justify-content:space-between;align-items:center;
+  background:rgba(6,6,12,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.04);z-index:1000;transition:all .3s}
+.nav.scrolled{background:rgba(6,6,12,.92);border-bottom-color:var(--bdr)}
+.nav-left{display:flex;align-items:center;gap:2rem}
+.nav-brand{font-size:.9rem;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:.5rem}
+.nav-brand .mark{color:var(--ac);font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;
+  background:rgba(0,229,198,.1);border:1px solid rgba(0,229,198,.2);padding:.15rem .45rem;border-radius:4px;letter-spacing:.08em}
+.nav-mid{display:flex;gap:1.8rem}
+.nav-mid a{font-size:.75rem;font-weight:500;color:var(--t2);text-decoration:none;letter-spacing:.02em;transition:color .3s;position:relative}
+.nav-mid a:hover{color:var(--txt)}
+.nav-mid a::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1px;background:var(--ac);transition:width .3s}
+.nav-mid a:hover::after{width:100%}
+.nav-right a{font-size:.7rem;font-weight:600;color:var(--bg);background:var(--ac);padding:.4rem 1rem;border-radius:6px;
+  text-decoration:none;transition:all .25s;letter-spacing:.02em}
+.nav-right a:hover{background:var(--ac2);box-shadow:0 0 20px rgba(0,229,198,.25);transform:translateY(-1px)}
 
-.header{width:100%;padding:4rem 2rem 3rem;text-align:center;position:relative}
-.header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 0%,#00e5c620 0%,transparent 70%)}
-.header *{position:relative;z-index:1}
-.logo{font-size:2.8rem;font-weight:900;letter-spacing:-.03em;opacity:0;animation:fadeUp .6s ease forwards .1s}
-.logo .a{color:var(--ac)}
-.tag{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--t2);letter-spacing:.15em;margin-top:.6rem;opacity:0;animation:fadeUp .6s ease forwards .25s}
-.season-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ac);border:1px solid var(--ac);border-radius:4px;padding:.15rem .5rem;margin-top:.8rem;letter-spacing:.1em;opacity:0;animation:fadeUp .6s ease forwards .4s}
+/* === HERO === */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;padding:6rem 2rem 4rem;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:800px;
+  background:radial-gradient(circle,#00e5c612 0%,transparent 60%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:200px;
+  background:linear-gradient(to top,var(--bg),transparent);pointer-events:none;z-index:1}
 
-/* Stat bar under hero */
-.stat-bar{display:flex;justify-content:center;gap:2.5rem;padding:1.2rem 2rem;background:var(--card);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);flex-wrap:wrap;opacity:0;animation:fadeUp .6s ease forwards .55s}
-.stat-bar .sb-item{text-align:center}
-.stat-bar .sb-val{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--ac)}
-.stat-bar .sb-lbl{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--t3);letter-spacing:.15em;text-transform:uppercase;margin-top:.15rem}
+.hero-content{position:relative;z-index:2;max-width:800px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.6rem;font-family:'JetBrains Mono',monospace;font-size:.65rem;
+  color:var(--t2);letter-spacing:.15em;text-transform:uppercase;margin-bottom:2rem;
+  opacity:0;animation:fadeIn .8s ease forwards .2s}
+.hero-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--ac);animation:blink 2s ease infinite}
+.hero-title{font-size:clamp(3rem,8vw,5.5rem);font-weight:900;line-height:.92;letter-spacing:-.04em;
+  margin-bottom:1.5rem;opacity:0;animation:fadeIn .8s ease forwards .4s}
+.hero-title .accent{background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:1.15rem;font-weight:300;color:var(--t2);line-height:1.7;max-width:500px;margin:0 auto 2.5rem;
+  opacity:0;animation:fadeIn .8s ease forwards .6s}
+.hero-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;
+  opacity:0;animation:fadeIn .8s ease forwards .8s}
+.btn-primary{display:inline-flex;align-items:center;gap:.5rem;background:var(--ac);color:var(--bg);
+  font-weight:700;font-size:.85rem;padding:.75rem 1.8rem;border-radius:8px;text-decoration:none;
+  transition:all .25s;letter-spacing:.01em}
+.btn-primary:hover{background:var(--ac2);box-shadow:0 0 30px rgba(0,229,198,.2);transform:translateY(-2px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:.5rem;color:var(--t2);font-weight:500;font-size:.85rem;
+  padding:.75rem 1.8rem;border-radius:8px;text-decoration:none;border:1px solid var(--bdr2);transition:all .25s}
+.btn-ghost:hover{color:var(--txt);border-color:var(--t3);background:rgba(255,255,255,.03)}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-.main{max-width:700px;width:100%;padding:2rem;flex:1;position:relative;z-index:1}
+/* === TICKER === */
+.ticker{position:relative;z-index:2;width:100%;background:var(--card);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
+.ticker-inner{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);padding:0}
+.ticker-item{padding:1.2rem 1.5rem;text-align:center;border-right:1px solid var(--bdr);position:relative}
+.ticker-item:last-child{border-right:none}
+.ticker-item .tv{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--txt);line-height:1}
+.ticker-item .tv .unit{font-size:.7rem;color:var(--t3);font-weight:400;margin-left:.15rem}
+.ticker-item .tl{font-size:.6rem;font-weight:500;color:var(--t3);letter-spacing:.12em;text-transform:uppercase;margin-top:.35rem}
+.ticker-item.highlight .tv{color:var(--ac)}
 
-.section-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--t3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.8rem;padding-left:.2rem}
+/* === SECTION WRAPPER === */
+.wrap{max-width:760px;width:100%;margin:0 auto;padding:0 2rem;position:relative;z-index:2}
 
-.intro{text-align:center;margin-bottom:2.5rem}
-.intro p{font-size:1.05rem;color:var(--t2);line-height:1.8}
+/* === SECTION HEADERS === */
+.sec-header{display:flex;align-items:center;gap:.8rem;margin-bottom:1.5rem;margin-top:4rem}
+.sec-line{flex:0 0 3px;height:16px;background:var(--ac);border-radius:2px}
+.sec-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:600;color:var(--t3);
+  letter-spacing:.2em;text-transform:uppercase}
 
-/* NEW badge */
-.badge-new{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.5rem;background:var(--ac);color:var(--bg);padding:.1rem .4rem;border-radius:3px;font-weight:700;letter-spacing:.08em;margin-left:.5rem;vertical-align:middle;animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* === FEATURED CARD (Latest decode) === */
+.featured{display:block;text-decoration:none;background:linear-gradient(135deg,var(--card) 0%,var(--card2) 100%);
+  border:1px solid var(--bdr);border-radius:16px;padding:2rem;margin-bottom:1.2rem;position:relative;overflow:hidden;
+  transition:all .35s cubic-bezier(.4,0,.2,1)}
+.featured::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--ac),var(--gold),var(--ac));opacity:0;transition:opacity .35s}
+.featured::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 90% 50%,rgba(0,229,198,.04) 0%,transparent 70%);pointer-events:none}
+.featured:hover{border-color:rgba(0,229,198,.3);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.featured:hover::before{opacity:1}
+.featured-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;position:relative}
+.featured-badge{display:inline-flex;align-items:center;gap:.4rem;font-family:'JetBrains Mono',monospace;font-size:.55rem;
+  font-weight:600;color:var(--ac);letter-spacing:.15em;text-transform:uppercase}
+.featured-badge .live-dot{width:5px;height:5px;border-radius:50%;background:var(--ac);animation:blink 1.5s ease infinite}
+.featured-round{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--t3);letter-spacing:.1em}
+.featured h2{font-size:1.8rem;font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-bottom:.4rem;position:relative}
+.featured h2 .flag{font-style:normal;margin-right:.4rem}
+.featured .sub{font-size:.9rem;color:var(--t2);margin-bottom:1.2rem}
+.featured-stats{display:flex;gap:2rem;flex-wrap:wrap}
+.featured-stat{position:relative}
+.featured-stat .fs-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--txt)}
+.featured-stat .fs-lbl{font-size:.6rem;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;margin-top:.1rem}
+.featured-stat.winner .fs-val{color:var(--gold)}
+.featured-arrow{position:absolute;right:2rem;bottom:2rem;font-size:1.4rem;color:var(--t3);
+  transition:all .3s;opacity:.5}
+.featured:hover .featured-arrow{color:var(--ac);transform:translateX(4px);opacity:1}
 
-.race-card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-decoration:none;display:block;transition:border-color .3s,transform .3s,box-shadow .3s;position:relative;overflow:hidden}
-.race-card::after{content:'→';position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);font-size:1.2rem;color:var(--t3);transition:color .3s,transform .3s}
-.race-card:hover{border-color:var(--ac);transform:translateY(-2px);box-shadow:0 8px 30px #00e5c610}
-.race-card:hover::after{color:var(--ac);transform:translateY(-50%) translateX(3px)}
-.race-card .round{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ac);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.4rem}
-.race-card h2{font-size:1.4rem;font-weight:800;color:var(--txt);margin-bottom:.3rem}
-.race-card .flag{font-style:normal;margin-right:.3rem}
-.race-card .detail{font-size:.85rem;color:var(--t2)}
-.race-card .stats{display:flex;gap:1.5rem;margin-top:.8rem;flex-wrap:wrap}
-.race-card .stat{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--t3)}
-.race-card .stat span{color:var(--txt);font-weight:600}
+/* === RACE CARDS === */
+.race-card{display:flex;align-items:center;gap:1.2rem;text-decoration:none;background:var(--card);
+  border:1px solid var(--bdr);border-radius:12px;padding:1.2rem 1.5rem;margin-bottom:.8rem;
+  transition:all .3s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
+.race-card:hover{border-color:rgba(0,229,198,.2);transform:translateX(4px);background:var(--card2)}
+.race-card .rc-pos{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--t3);
+  letter-spacing:.1em;min-width:50px}
+.race-card .rc-flag{font-size:1.6rem;line-height:1}
+.race-card .rc-info{flex:1}
+.race-card .rc-name{font-size:1rem;font-weight:700;color:var(--txt)}
+.race-card .rc-detail{font-size:.75rem;color:var(--t2);margin-top:.1rem}
+.race-card .rc-winner{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:600;
+  color:var(--gold);min-width:60px;text-align:right}
+.race-card .rc-arrow{color:var(--t3);font-size:.9rem;transition:all .3s;margin-left:.5rem}
+.race-card:hover .rc-arrow{color:var(--ac);transform:translateX(3px)}
 
-.divider{width:40px;height:1px;background:var(--bdr);margin:1.5rem auto}
+/* === UP NEXT === */
+.next-card{text-align:center;padding:2.5rem 2rem;border:1px solid var(--bdr);border-radius:16px;
+  margin-bottom:1rem;position:relative;overflow:hidden;
+  background:repeating-linear-gradient(90deg,transparent,transparent 79px,var(--bdr) 79px,var(--bdr) 80px),
+  repeating-linear-gradient(0deg,transparent,transparent 79px,var(--bdr) 79px,var(--bdr) 80px);
+  background-size:80px 80px;background-color:var(--bg2)}
+.next-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 60% at 50% 50%,var(--bg2) 30%,transparent 100%)}
+.next-card *{position:relative}
+.next-flag{font-size:3rem;margin-bottom:.8rem;filter:grayscale(.3)}
+.next-round{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--t3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.5rem}
+.next-name{font-size:1.5rem;font-weight:800;color:var(--t2);letter-spacing:-.01em}
+.next-date{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--t3);margin-top:.4rem}
+.next-countdown{display:inline-flex;align-items:center;gap:.4rem;font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;color:var(--ac);margin-top:.8rem;padding:.3rem .8rem;background:rgba(0,229,198,.06);
+  border:1px solid rgba(0,229,198,.12);border-radius:6px}
 
-.coming{text-align:center;padding:2rem;border:1px dashed var(--bdr);border-radius:12px;margin-bottom:1rem;transition:border-color .3s}
-.coming:hover{border-color:var(--t3)}
-.coming .round{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--t3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.4rem}
-.coming h2{font-size:1.2rem;font-weight:700;color:var(--t3)}
-.coming .detail{font-size:.8rem;color:var(--t3);margin-top:.3rem}
-.coming .countdown{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--ac);margin-top:.6rem;opacity:.7}
+/* === METHODOLOGY === */
+.method{margin-top:4rem;margin-bottom:2rem}
+.method-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.method-item{padding:1.5rem;background:var(--card);border:1px solid var(--bdr);border-radius:12px;transition:border-color .3s}
+.method-item:hover{border-color:var(--bdr2)}
+.method-icon{font-size:1.5rem;margin-bottom:.8rem}
+.method-title{font-size:.85rem;font-weight:700;color:var(--txt);margin-bottom:.3rem}
+.method-desc{font-size:.75rem;color:var(--t2);line-height:1.6}
 
-.subscribe{text-align:center;margin:3rem 0 2rem;padding:2.5rem 2rem;background:linear-gradient(135deg,var(--card) 0%,#141428 100%);border:1px solid var(--bdr);border-radius:12px;position:relative;overflow:hidden}
-.subscribe::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 100%,#00e5c610 0%,transparent 70%);pointer-events:none}
-.subscribe *{position:relative}
-.subscribe h3{font-size:1.1rem;font-weight:700;color:var(--txt);margin-bottom:.4rem}
-.subscribe p{font-size:.9rem;color:var(--t2);margin-bottom:1.2rem}
-.subscribe a{display:inline-block;background:var(--ac);color:var(--bg);font-weight:700;font-size:.9rem;padding:.7rem 2rem;border-radius:8px;text-decoration:none;transition:transform .3s,box-shadow .3s}
-.subscribe a:hover{transform:translateY(-1px);box-shadow:0 4px 20px #00e5c630}
+/* === CTA === */
+.cta{text-align:center;margin:4rem 0 3rem;padding:3rem 2rem;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--card) 0%,#0d0d20 50%,var(--card) 100%);
+  border:1px solid var(--bdr);border-radius:20px}
+.cta::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:400px;height:400px;
+  background:radial-gradient(circle,rgba(0,229,198,.08) 0%,transparent 60%);pointer-events:none}
+.cta *{position:relative}
+.cta-eyebrow{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ac);letter-spacing:.2em;
+  text-transform:uppercase;margin-bottom:.8rem}
+.cta h3{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.5rem}
+.cta p{font-size:.9rem;color:var(--t2);margin-bottom:1.5rem;max-width:400px;margin-left:auto;margin-right:auto}
+.cta-btn{display:inline-flex;align-items:center;gap:.5rem;background:var(--ac);color:var(--bg);
+  font-weight:700;font-size:.9rem;padding:.8rem 2.2rem;border-radius:10px;text-decoration:none;
+  transition:all .25s}
+.cta-btn:hover{background:var(--ac2);box-shadow:0 0 30px rgba(0,229,198,.25);transform:translateY(-2px)}
 
-.footer{width:100%;text-align:center;padding:2.5rem 2rem;color:var(--t3);font-size:.65rem;border-top:1px solid var(--bdr);position:relative;z-index:1}
-.footer-inner{max-width:700px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:.6rem}
-.footer-logo{color:var(--ac);font-weight:700;font-size:.75rem;letter-spacing:.05em}
-.footer-sub{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--t3)}
-.footer-links{display:flex;gap:1.2rem;margin-top:.3rem}
-.footer-links a{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--t3);text-decoration:none;transition:color .3s}
-.footer-links a:hover{color:var(--ac)}
+/* === FOOTER === */
+.footer{width:100%;border-top:1px solid var(--bdr);padding:3rem 2rem;position:relative;z-index:2}
+.footer-inner{max-width:760px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;flex-wrap:wrap}
+.footer-left .fl-brand{font-size:1rem;font-weight:800;margin-bottom:.4rem}
+.footer-left .fl-brand .accent{color:var(--ac)}
+.footer-left .fl-desc{font-size:.7rem;color:var(--t3);max-width:250px;line-height:1.6}
+.footer-right{display:flex;gap:2.5rem}
+.footer-col h4{font-family:'JetBrains Mono',monospace;font-size:.55rem;font-weight:600;color:var(--t3);
+  letter-spacing:.15em;text-transform:uppercase;margin-bottom:.6rem}
+.footer-col a{display:block;font-size:.75rem;color:var(--t2);text-decoration:none;margin-bottom:.4rem;transition:color .3s}
+.footer-col a:hover{color:var(--ac)}
+.footer-bottom{max-width:760px;margin:2rem auto 0;padding-top:1.5rem;border-top:1px solid var(--bdr);
+  display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--t3)}
 
-@media(max-width:600px){
-  .header{padding:3rem 1.5rem 2rem}
-  .logo{font-size:2.2rem}
-  .main{padding:1.5rem}
-  .nav{padding:.8rem 1.2rem}
-  .nav-links{gap:.8rem}
-  .stat-bar{gap:1.5rem;padding:1rem 1.5rem}
-  .stat-bar .sb-val{font-size:1.1rem}
+/* === SCROLL REVEAL === */
+.reveal{opacity:0;transform:translateY(25px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* === MOBILE === */
+@media(max-width:768px){
+  .nav{padding:0 1.2rem;height:50px}
+  .nav-mid{display:none}
+  .hero{min-height:auto;padding:7rem 1.5rem 4rem}
+  .hero-title{font-size:clamp(2.4rem,10vw,3.5rem)}
+  .ticker-inner{grid-template-columns:repeat(2,1fr)}
+  .ticker-item{padding:.8rem 1rem}
+  .ticker-item .tv{font-size:1.2rem}
+  .wrap{padding:0 1.5rem}
+  .featured{padding:1.5rem}
+  .featured h2{font-size:1.3rem}
+  .featured-stats{gap:1.2rem}
+  .method-grid{grid-template-columns:1fr}
+  .footer-inner{flex-direction:column}
+  .footer-right{gap:2rem}
+  .footer-bottom{flex-direction:column;gap:.4rem}
+  .race-card{padding:1rem 1.2rem}
 }
 </style>
 </head>
 <body>
 
-<nav class="nav">
-<div class="nav-logo">R<span class="a">D</span></div>
-<div class="nav-links">
-<a href="#decodes">Decodes</a>
-<a href="#next">Schedule</a>
-<a href="#subscribe" class="nav-cta">Subscribe</a>
+<div class="bg-grid"></div>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+<div class="nav-left">
+  <div class="nav-brand">Race Decode <span class="mark">2026</span></div>
+</div>
+<div class="nav-mid">
+  <a href="#decodes">Decodes</a>
+  <a href="#schedule">Schedule</a>
+  <a href="#method">Methodology</a>
+</div>
+<div class="nav-right">
+  <a href="#subscribe">Subscribe</a>
 </div>
 </nav>
 
-<div class="header">
-<div class="logo">Race <span class="a">Decode</span></div>
-<div class="tag">F1 through an engineer's lens</div>
-<div class="season-badge">2026 Season</div>
+<!-- HERO -->
+<section class="hero">
+<div class="hero-content">
+  <div class="hero-eyebrow"><span class="dot"></span> Season 2026 in Progress</div>
+  <h1 class="hero-title">F1 through<br>real <span class="accent">data.</span></h1>
+  <p class="hero-sub">Post-race telemetry breakdowns. Lap-by-lap analysis. No hot takes, just what the numbers say.</p>
+  <div class="hero-actions">
+    <a href="#decodes" class="btn-primary">Read latest decode</a>
+    <a href="#method" class="btn-ghost">How it works</a>
+  </div>
+</div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+<div class="ticker-inner">
+  <div class="ticker-item highlight"><div class="tv">2</div><div class="tl">Races Decoded</div></div>
+  <div class="ticker-item"><div class="tv">113<span class="unit">laps</span></div><div class="tl">Analysed</div></div>
+  <div class="ticker-item"><div class="tv">11</div><div class="tl">DNFs This Season</div></div>
+  <div class="ticker-item"><div class="tv">12<span class="unit">charts</span></div><div class="tl">Published</div></div>
+</div>
 </div>
 
-<div class="stat-bar">
-<div class="sb-item"><div class="sb-val">2</div><div class="sb-lbl">Races Decoded</div></div>
-<div class="sb-item"><div class="sb-val">113</div><div class="sb-lbl">Laps Analysed</div></div>
-<div class="sb-item"><div class="sb-val">11</div><div class="sb-lbl">DNFs This Season</div></div>
+<!-- LATEST DECODES -->
+<div class="wrap">
+
+<div class="sec-header reveal" id="decodes">
+  <div class="sec-line"></div>
+  <div class="sec-label">Latest Decodes</div>
 </div>
 
-<div class="main">
-
-<div class="intro">
-<p>Real telemetry. Honest numbers. No opinions disguised as analysis.<br>Published after every Grand Prix.</p>
-</div>
-
-<div class="section-label" id="decodes">Latest Decodes</div>
-
-<a href="china.html" class="race-card">
-<div class="round">Round 02 · Sprint Weekend <span class="badge-new">NEW</span></div>
-<h2><em class="flag">🇨🇳</em> Chinese GP — Antonelli's First Win</h2>
-<div class="detail">Shanghai · 56 Laps · 15 March 2026</div>
-<div class="stats">
-<div class="stat">Team gap <span>0.71s</span></div>
-<div class="stat">Winner <span>ANT</span></div>
-<div class="stat">DNFs <span>7</span></div>
-</div>
+<!-- Featured: Latest race -->
+<a href="china.html" class="featured reveal">
+  <div class="featured-top">
+    <div class="featured-badge"><span class="live-dot"></span> Latest</div>
+    <div class="featured-round">R02 · Sprint Weekend</div>
+  </div>
+  <h2><em class="flag">🇨🇳</em> Chinese Grand Prix</h2>
+  <div class="sub">Antonelli's first win — Shanghai, 56 Laps, 15 March 2026</div>
+  <div class="featured-stats">
+    <div class="featured-stat winner"><div class="fs-val">ANT</div><div class="fs-lbl">Winner</div></div>
+    <div class="featured-stat"><div class="fs-val">0.71s</div><div class="fs-lbl">Team Gap</div></div>
+    <div class="featured-stat"><div class="fs-val">7</div><div class="fs-lbl">DNFs</div></div>
+    <div class="featured-stat"><div class="fs-val">56</div><div class="fs-lbl">Laps</div></div>
+  </div>
+  <div class="featured-arrow">&rarr;</div>
 </a>
 
-<a href="australia.html" class="race-card">
-<div class="round">Round 01</div>
-<h2><em class="flag">🇦🇺</em> Australian GP — Mercedes One-Two</h2>
-<div class="detail">Melbourne · 57 Laps · 2 March 2026</div>
-<div class="stats">
-<div class="stat">Team gap <span>≈ 0.00s</span></div>
-<div class="stat">Winner <span>RUS</span></div>
-<div class="stat">Decided by <span>VSC</span></div>
-</div>
+<!-- Previous races -->
+<a href="australia.html" class="race-card reveal">
+  <div class="rc-pos">R01</div>
+  <div class="rc-flag">🇦🇺</div>
+  <div class="rc-info">
+    <div class="rc-name">Australian GP — Mercedes One-Two</div>
+    <div class="rc-detail">Melbourne · 57 Laps · Decided by VSC</div>
+  </div>
+  <div class="rc-winner">RUS</div>
+  <div class="rc-arrow">&rarr;</div>
 </a>
 
-<div class="divider"></div>
-
-<div class="section-label" id="next">Up Next</div>
-
-<div class="coming">
-<div class="round">Round 03</div>
-<h2>🇯🇵 Japanese GP — Suzuka</h2>
-<div class="detail">27 March 2026</div>
-<div class="countdown">Decode drops Monday 28 March</div>
+<!-- UP NEXT -->
+<div class="sec-header reveal" id="schedule">
+  <div class="sec-line"></div>
+  <div class="sec-label">Up Next</div>
 </div>
 
-<div class="subscribe" id="subscribe">
-<h3>Never miss a decode.</h3>
-<p>Get each race breakdown in your inbox. Free, forever.</p>
-<a href="#">Subscribe on Substack →</a>
+<div class="next-card reveal">
+  <div class="next-flag">🇯🇵</div>
+  <div class="next-round">Round 03</div>
+  <div class="next-name">Japanese GP — Suzuka</div>
+  <div class="next-date">27 March 2026</div>
+  <div class="next-countdown">Decode drops Monday 28 March</div>
+</div>
+
+<!-- METHODOLOGY -->
+<div class="sec-header reveal" id="method">
+  <div class="sec-line"></div>
+  <div class="sec-label">How We Decode</div>
+</div>
+
+<div class="method-grid reveal">
+  <div class="method-item">
+    <div class="method-icon">&#x1F4E1;</div>
+    <div class="method-title">FastF1 Telemetry</div>
+    <div class="method-desc">Real session data pulled directly from the F1 live timing API. Lap times, sector splits, tyre data.</div>
+  </div>
+  <div class="method-item">
+    <div class="method-icon">&#x1F4CA;</div>
+    <div class="method-title">Custom Analysis</div>
+    <div class="method-desc">Every chart is built from scratch in Python. Pace consistency, degradation curves, gap analysis.</div>
+  </div>
+  <div class="method-item">
+    <div class="method-icon">&#x1F3AF;</div>
+    <div class="method-title">Engineer's Lens</div>
+    <div class="method-desc">No clickbait. We explain what happened, why, and what the numbers predict for the next race.</div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta reveal" id="subscribe">
+  <div class="cta-eyebrow">Free Forever</div>
+  <h3>Never miss a decode.</h3>
+  <p>Race breakdown in your inbox every Monday after the chequered flag.</p>
+  <a href="#" class="cta-btn">Subscribe on Substack &rarr;</a>
 </div>
 
 </div>
 
-<div class="footer">
+<!-- FOOTER -->
+<footer class="footer">
 <div class="footer-inner">
-<div class="footer-logo">RACE DECODE</div>
-<div class="footer-links">
-<a href="https://github.com/azhagusiva11">GitHub</a>
-<a href="#">Twitter / X</a>
-<a href="#">Substack</a>
+  <div class="footer-left">
+    <div class="fl-brand">Race <span class="accent">Decode</span></div>
+    <div class="fl-desc">Data-driven F1 post-race analysis. Built with FastF1, Python, and obsessive attention to detail.</div>
+  </div>
+  <div class="footer-right">
+    <div class="footer-col">
+      <h4>Content</h4>
+      <a href="#decodes">All Decodes</a>
+      <a href="#method">Methodology</a>
+      <a href="#subscribe">Subscribe</a>
+    </div>
+    <div class="footer-col">
+      <h4>Connect</h4>
+      <a href="https://github.com/azhagusiva11">GitHub</a>
+      <a href="#">Twitter / X</a>
+      <a href="#">Substack</a>
+    </div>
+  </div>
 </div>
-<div class="footer-sub">Powered by FastF1 telemetry · racedecode.com · 2026</div>
+<div class="footer-bottom">
+  <span>racedecode.com &copy; 2026</span>
+  <span>Powered by FastF1 telemetry</span>
 </div>
-</div>
+</footer>
+
+<script>
+// Nav scroll effect
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>50)});
+
+// Scroll reveal
+const obs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})
+},{threshold:.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
 
 </body>
 </html>
